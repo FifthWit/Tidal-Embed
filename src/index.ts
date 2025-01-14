@@ -37,13 +37,13 @@ async function fetchMediaDetails(
 app.get('/', (c) => {
   return c.json({
     message:
-      'Visit /embed/tmdb/:id for movies or /embed/tmdb/:id/:season/:episode for TV shows',
+      'Visit /share/tmdb/:id for movies or /share/tmdb/:id/:season/:episode for TV shows',
     contribute: 'https://github.com/FifthWit/Tidal-Embed',
   });
 });
 
-// TMDB embed route
-app.get('/embed/tmdb/:id/:season?/:episode?', async (c) => {
+// TMDB share route
+app.get('/share/tmdb/:id/:season?/:episode?', async (c) => {
   try {
     const id = c.req.param('id');
     const season = c.req.param('season');
@@ -88,16 +88,26 @@ app.get('/embed/tmdb/:id/:season?/:episode?', async (c) => {
         seasonData = responseJson
     }
 
+    let creators = ''
+    for (let i = 0; i < response.created_by.length; i++) {
+        creators += response.created_by[i].name;
+        if (i < response.created_by.length - 1) {
+            creators += ', ';
+        } else {
+            creators += ' & ';
+        }
+    }
+
     // llm ahhhh code below
     const formattedTitle = title.toLowerCase().replace(/\s+/g, '-');
     return c.html(
       `
       <head>
         <meta property="og:title" content="Watch ${title} S${season}E${episode} on ${name}" />
-        <meta property="og:description" content="${description}" />
+        <meta property="og:description" content="${description} By ${creators}" />
         <meta property="og:image" content="${image}" />
         <meta property="og:url" content="${serviceUrl}" />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content="video" />
         <body>Redirecting...</body>
         <script>
           setTimeout(function() {
